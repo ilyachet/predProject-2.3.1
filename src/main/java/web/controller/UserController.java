@@ -12,7 +12,7 @@ import web.model.User;
 @RequestMapping("/")
 public class UserController {
 
-    private UserDAO userDAO = new UserDAOImpl();
+    private UserDAO userDAO;
 
     @Autowired
     public UserController(UserDAO userDAO) {
@@ -22,8 +22,12 @@ public class UserController {
     @GetMapping()
     public String printAllUsers(Model model) {
         model.addAttribute("userList", userDAO.allUsers());
-
-        return "users.html";
+        return "users";
+    }
+    @GetMapping("/{id}")
+    public String printOneUser(@PathVariable("id") int id, Model model) {
+        model.addAttribute("user", userDAO.getById(id));
+        return "user";
     }
 
     @GetMapping("/new")
@@ -37,5 +41,23 @@ public class UserController {
         userDAO.add(user);
         return "redirect:/";
     }
+    @GetMapping("/{id}/edit")
+    public String edit(Model model, @PathVariable("id") int id) {
+        model.addAttribute("user", userDAO.getById(id));
+        return "edit";
+    }
+    @PatchMapping("/{id}")
+    public String update(@ModelAttribute("user") User user, @PathVariable("id") int id) {
+        userDAO.edit(user);
+        return "redirect:/";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") int id) {
+        userDAO.delete(userDAO.getById(id));
+        return "redirect:/";
+    }
+
+
 
 }
