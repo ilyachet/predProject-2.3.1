@@ -1,5 +1,6 @@
 package web.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -52,6 +53,11 @@ public class UserController {
         return "redirect:/";
     }
 
+    @GetMapping("/{id}/delete")
+    public String deletePage(Model model, @PathVariable("id") int id) {
+        model.addAttribute("user", userDAO.getById(id));
+        return "delete";
+    }
     @DeleteMapping("/{id}")
     public String delete(@PathVariable("id") int id) {
         userDAO.delete(userDAO.getById(id));
