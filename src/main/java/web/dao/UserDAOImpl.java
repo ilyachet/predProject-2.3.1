@@ -1,51 +1,55 @@
 package web.dao;
 
-import org.springframework.stereotype.Component;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import web.model.User;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-@Component
+
+@Repository
 public class UserDAOImpl implements UserDAO{
 
-    private static final AtomicInteger AUTO_ID = new AtomicInteger(0);
-    private static Map<Integer, User> users = new HashMap<>();
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    static {
-        User user1 = new User();
-        user1.setId(AUTO_ID.getAndIncrement());
-        user1.setName("Name 1");
-        user1.setLastName("LastName 1");
-        user1.setAge(1);
-        users.put(user1.getId(), user1);
-    }
+//    static {
+//        User user = new User();
+//        user.setName("name 1");
+//        user.setLastName("name 2");
+//        user.setAge(12);
+//        entityManager.persist(new User());
+//    }
 
     @Override
     public List<User> allUsers() {
-        return new ArrayList<>(users.values());
+        return entityManager.createQuery("from User", User.class).getResultList();
     }
 
     @Override
+    @Transactional
     public void add(User user) {
-        user.setId(AUTO_ID.getAndIncrement());
-        users.put(user.getId(), user);
+        entityManager.persist(user);
+        entityManager.flush();
     }
 
     @Override
+    @Transactional
     public void delete(User user) {
-        users.remove(user.getId());
+//        entityManager.remove(user);
+        entityManager.remove(entityManager.contains(user) ? user : entityManager.merge(user));
+        entityManager.flush();
     }
 
     @Override
+    @Transactional
     public void edit(User user) {
-        users.put(user.getId(), user);
+        entityManager.merge(user);
+        entityManager.flush();
     }
 
     @Override
     public User getById(int id) {
-        return users.get(id);
+        return entityManager.find(User.class, id);
     }
 }
